@@ -13,7 +13,7 @@ class ClsNode:
 
         self.candidate_attr = candidate_attr
 
-        self.depth = parent.depth if parent is not None else 0
+        self.depth = parent.depth + 1 if parent is not None else 0
 
         self.split_attr = None
         self.split_value = None
