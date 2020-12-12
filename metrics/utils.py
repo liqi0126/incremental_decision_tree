@@ -44,10 +44,9 @@ def splitting_metric_nume(njk, metric_func, total_sample, class_freq):
     split_value = (sorted_value[:-1] + sorted_value[1:]) / 2
 
     D = total_sample
+    D1 = 0
+    D1_class_freq = {k: 0 for k in class_freq}
     for index in range(len(split_value)):
-        D1 = 0
-        D1_class_freq = {k: 0 for k in class_freq}
-
         nk = njk[sorted_value[index]]
         for k in nk:
             D1_class_freq[k] += nk[k]
