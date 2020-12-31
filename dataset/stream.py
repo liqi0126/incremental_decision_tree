@@ -3,9 +3,10 @@ import pandas as pd
 import sys
 sys.path.append('..')
 from model.utils import Attr, AttrType
+from collections import Counter
 
 class DataStream:
-    def __init__(self, infile, shuffle=False, seed=0, cyclic=False):
+    def __init__(self, infile, attrTypes=None, shuffle=False, seed=0, cyclic=False):
         df = pd.read_csv(infile)
         
         if shuffle:
@@ -13,13 +14,17 @@ class DataStream:
 
         self.attributes = []
         for idx, name in enumerate(df.columns[:-1]):
-            if df[name].dtype == object:
-                self.attributes.append(Attr(idx, AttrType.CATE, name))
+            if attrTypes is None:
+                if df[name].dtype == object:
+                    self.attributes.append(Attr(idx, AttrType.CATE, name))
+                else:
+                    self.attributes.append(Attr(idx, AttrType.NUME, name))
             else:
-                self.attributes.append(Attr(idx, AttrType.NUME, name))
+                self.attributes.append(Attr(idx, attrTypes[idx], name))
 
         self.n_class = len(set(df.iloc[:, -1]))
         self.X, self.y = df.iloc[:, :-1].values, df.iloc[:, -1].values
+        print(Counter(self.y))
         self.num_inst = self.X.shape[0]
         self.pointer = 0
 

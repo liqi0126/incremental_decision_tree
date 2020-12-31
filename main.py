@@ -19,6 +19,7 @@ def arg_parse():
     parser.add_argument('--tree', nargs='+', type=str,
                         choices=['v', 'e', 'vfdt', 'efdt'], default=['v', 'e'])
     parser.add_argument('--dataset', type=str, default='forest')
+    parser.add_argument('--max_instance', type=int, default=20000)
     return parser.parse_args()
 
 
@@ -26,9 +27,16 @@ if __name__ == '__main__':
     start_time = time.time()
 
     args = arg_parse()
-
-    stream = DataStream(dataset.config.csv_path[args.dataset], shuffle=True)
+    
+    if args.dataset == 'poker':
+        attrTypes = [AttrType.CATE] * 10
+    else:
+        attrTypes = None
+    stream = DataStream(dataset.config.csv_path[args.dataset], attrTypes=attrTypes, shuffle=True)
     candidate_attr, n_class = stream.attributes, stream.n_class
+
+    for attr in candidate_attr:
+        attr.print()
 
     # hyperparameter
     delta = 0.01
@@ -48,9 +56,10 @@ if __name__ == '__main__':
     for i, learner in enumerate(learners):
         print(legend[i])
         model = learner(candidate_attr, n_class, delta, max_depth, min_sample)
-        eval = EvaluatePrequential(stream, model, metric_func, max_inst=20000)
+        eval = EvaluatePrequential(stream, model, metric_func, max_inst=args.max_instance)
         performance = eval.doMainTask()
         plt.plot(performance)
+        model.print()
 
     plt.title("%s dataset" % args.dataset) 
     plt.xlabel("instances \\times 1000") 

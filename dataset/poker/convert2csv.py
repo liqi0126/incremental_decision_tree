@@ -1,6 +1,6 @@
 import csv
 
-headers = ['feat%d' %i for i in range(11)] + ['y']
+headers = ['S1', 'C1', 'S2', 'C2', 'S3', 'C3', 'S4', 'C4', 'S5', 'C5', 'y']
 rows = []
 
 with open('poker-hand-training-true.data', 'r') as f:
