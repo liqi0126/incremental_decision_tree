@@ -23,6 +23,11 @@ if __name__ == '__main__':
         else:
             candidate_attr.append(Attr(idx, AttrType.NUME, name))
 
+    X, y = df.iloc[:, :-1].values, df.iloc[:, -1].values
+    for index, attr in enumerate(candidate_attr):
+        if attr.type == AttrType.CATE:
+            attr.values = list(set(X[:,index]))
+
     n_class = len(set(df.iloc[:, -1]))
 
     split = 1000

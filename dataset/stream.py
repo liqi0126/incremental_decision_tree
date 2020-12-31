@@ -27,6 +27,11 @@ class DataStream:
 
         self.n_class = len(set(df.iloc[:, -1]))
         self.X, self.y = df.iloc[:, :-1].values, df.iloc[:, -1].values
+
+        for index, attr in enumerate(self.attributes):
+            if attr.type == AttrType.CATE:
+                attr.values = list(set(self.X[:,index]))
+
         print(Counter(self.y))
         self.num_inst = self.X.shape[0]
         self.pointer = 0

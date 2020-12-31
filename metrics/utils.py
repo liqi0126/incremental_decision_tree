@@ -53,7 +53,8 @@ def splitting_metric_nume(njk, metric_func, total_sample, class_freq):
             D1 += nk[k]
 
         D2 = D - D1
-        D2_class_freq = {k: class_freq[k] - D1_class_freq[k] for k in class_freq}
+        D2_class_freq = {k: class_freq[k] -
+                         D1_class_freq[k] for k in class_freq}
 
         m = 0
         if D1 > 0:
@@ -73,6 +74,7 @@ def splitting_metric_cate(njk, metric_func, total_sample, class_freq):
     best_split = None
 
     D = total_sample
+    m = 0
     for j in njk:
         D1 = 0
         D1_class_freq = {k: 0 for k in class_freq}
@@ -81,17 +83,7 @@ def splitting_metric_cate(njk, metric_func, total_sample, class_freq):
             D1_class_freq[k] = njk[j][k]
             D1 += njk[j][k]
 
-        D2 = D - D1
-        D2_class_freq = {k: class_freq[k] - D1_class_freq[k] for k in class_freq}
-
-        m = 0
         if D1 > 0:
             m += D1/D * metric_func(D1_class_freq)
-        if D2 > 0:
-            m += D2/D * metric_func(D2_class_freq)
 
-        if best_metric < m:
-            best_metric = m
-            best_split = j
-
-    return [best_metric, best_split]
+    return [m, None]

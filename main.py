@@ -41,8 +41,8 @@ if __name__ == '__main__':
         dataset.config.csv_path[args.dataset], attrTypes=attrTypes, shuffle=True)
     candidate_attr, n_class = stream.attributes, stream.n_class
 
-    # for attr in candidate_attr:
-    #     attr.print()
+    for attr in candidate_attr:
+        attr.print()
 
     # hyperparameter
     delta = 0.01
@@ -85,6 +85,9 @@ if __name__ == '__main__':
     performances = eval.doMainTask()
     for line in performances:
         plt.plot(line)
+    
+    # for learner in learners:
+    #     learner.print()
 
     plt.title("%s dataset" % args.dataset)
     plt.xlabel("instances \\times 1000")

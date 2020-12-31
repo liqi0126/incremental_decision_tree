@@ -4,12 +4,13 @@ import numpy as np
 from model.utils import AttrType, Attr
 from metrics.utils import splitting_metric
 
+from copy import deepcopy
+
 
 class ClsNode:
     def __init__(self, candidate_attr, parent):
         self.parent = parent
-        self.left_child = None
-        self.right_child = None
+        self.children = []
 
         self.candidate_attr = candidate_attr
 
@@ -30,15 +31,12 @@ class ClsNode:
 
         value = x[self.split_attr.index]
         if self.split_attr.type == AttrType.CATE:
-            if value == self.split_value:
-                return self.left_child
-            else:
-                return self.right_child
+            return self.children[self.split_attr.values.index(value)]
         elif self.split_attr.type == AttrType.NUME:
             if value <= self.split_value:
-                return self.left_child
+                return self.children[0]
             else:
-                return self.right_child
+                return self.children[1]
         else:
             raise RuntimeError
 
@@ -50,7 +48,7 @@ class ClsNode:
         return node
 
     def is_leaf(self):
-        return self.left_child is None and self.right_child is None
+        return len(self.children) == 0
 
     def most_freq(self):
         try:
@@ -96,7 +94,8 @@ class ClsNode:
                     else:
                         njk[j][k] += 1
 
-            split_metric, split_value = splitting_metric(attr.type, njk, metric_func, self.total_sample, self.class_freq)
+            split_metric, split_value = splitting_metric(
+                attr.type, njk, metric_func, self.total_sample, self.class_freq)
             # TODO: we can also use hoeffding bound to split ?
             if split_metric > best_metric_val:
                 best_metric_val = split_metric
@@ -106,39 +105,51 @@ class ClsNode:
         if best_metric_val < metric0:
             return
 
-        if best_split_attr.type == AttrType.CATE:
-            left_index = np.array(X[:, best_split_attr.index]) == best_split_value
-        elif best_split_attr.type == AttrType.NUME:
-            left_index = np.array(X[:, best_split_attr.index]) < best_split_value
-        else:
-            raise NotImplementedError
-
-        right_index = ~left_index
-        X_left, X_right, y_left, y_right = X[left_index], X[right_index], y[left_index], y[right_index]
-
         self.split_attr = best_split_attr
         self.split_value = best_split_value
-        self.right_child = ClsNode(self.candidate_attr, self)
-        self.left_child = ClsNode(self.candidate_attr, self)
-        self.right_child.recur_splitting(X_right, y_right, metric_func, max_depth, min_sample)
-        self.left_child.recur_splitting(X_left, y_left, metric_func, max_depth, min_sample)
+
+        if best_split_attr.type == AttrType.CATE:
+            self.children = []
+            for v in best_split_attr.values:
+                index = np.array(X[:, best_split_attr.index]) == v
+                candidate_attr = deepcopy(self.candidate_attr)
+                candidate_attr.pop(self.candidate_attr.index(best_split_attr))
+                self.children.append(ClsNode(candidate_attr, self))
+                self.children[-1].recur_splitting(X[index],
+                                                  y[index], metric_func, max_depth, min_sample)
+
+        elif best_split_attr.type == AttrType.NUME:
+            left_index = np.array(
+                X[:, best_split_attr.index]) < best_split_value
+            right_index = ~left_index
+            X_left, X_right, y_left, y_right = X[left_index], X[right_index], y[left_index], y[right_index]
+            self.children = [ClsNode(deepcopy(self.candidate_attr), self), ClsNode(
+                deepcopy(self.candidate_attr), self)]
+            self.children[0].recur_splitting(
+                X_left, y_left, metric_func, max_depth, min_sample)
+            self.children[1].recur_splitting(
+                X_right, y_right, metric_func, max_depth, min_sample)
+        else:
+            raise NotImplementedError
 
     def print(self):
         head = '    ' * self.depth
         if self.is_leaf():
             print(head + str(self.most_freq()), self.class_freq)
         else:
-            if self.split_attr.type == AttrType.CATE:
-                left_symbol = '=='
-                right_symbol = '!='
-            else:
-                left_symbol = '<'
-                right_symbol = '>='
+            if self.split_attr.type == AttrType.NUME:
+                print(head + str(self.split_attr.name) +
+                      '<' + str(self.split_value))
+                self.children[0].print()
+                print(head + str(self.split_attr.name) +
+                      '>=' + str(self.split_value))
+                self.children[1].print()
 
-            print(head + str(self.split_attr.name) + left_symbol + str(self.split_value))
-            self.left_child.print()
-            print(head + str(self.split_attr.name) + right_symbol + str(self.split_value))
-            self.right_child.print()
+            elif self.split_attr.type == AttrType.CATE:
+                for i, c in enumerate(self.children):
+                    print(head + str(self.split_attr.name) +
+                          '==' + str(self.split_attr.values[i]))
+                    c.print()
 
 
 class ClsTree:
@@ -148,7 +159,8 @@ class ClsTree:
         self.min_sample = min_sample
 
     def fit(self, X, y, metric_func):
-        self.root.recur_splitting(X, y, metric_func, self.max_depth, self.min_sample)
+        self.root.recur_splitting(
+            X, y, metric_func, self.max_depth, self.min_sample)
 
     def predict(self, X):
         return [self._predict(x) for x in X]

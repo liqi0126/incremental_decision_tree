@@ -3,6 +3,7 @@ from .vfdt import VfdtTree, VfdtNode
 from .utils import AttrType, Attr, hoeffing_bound
 from metrics.utils import splitting_metric
 
+from copy import deepcopy
 
 class EfdtNode(VfdtNode):
     def __init__(self, candidate_attr, parent):
@@ -10,34 +11,38 @@ class EfdtNode(VfdtNode):
 
     def current_split_metric(self, metric_func):
         attr = self.split_attr
+        i = self.candidate_attr.index(attr)
         D = self.total_sample
 
-        D1 = 0
-        D1_class_freq = {k: 0 for k in self.class_freq}
+        m = 0
 
         if attr.type == AttrType.NUME:
-            for j in self.nijk[attr.name]:
+            D1 = 0
+            D1_class_freq = {k: 0 for k in self.class_freq}
+
+            for j in self.nijk[i]:
                 if j <= self.split_value:
-                    nk = self.nijk[attr.name][j]
+                    nk = self.nijk[i][j]
                     for k in nk:
                         D1_class_freq[k] += nk[k]
                         D1 += nk[k]
+
+            D2 = D - D1
+            D2_class_freq = {k: self.class_freq[k] -
+                             D1_class_freq[k] for k in self.class_freq}
+
+            if D1 > 0:
+                m += D1/D * metric_func(D1_class_freq)
+            if D2 > 0:
+                m += D2/D * metric_func(D2_class_freq)
+
         elif attr.type == AttrType.CATE:
-            njk = self.nijk[attr.name]
-            j = self.split_value
-            for k in njk[j]:
-                D1_class_freq[k] = njk[j][k]
-                D1 += njk[j][k]
+            njk = self.nijk[i]
+            for j in njk:
+                D1 = sum(njk[j].values())
+                if D1 > 0:
+                    m += D1/D * metric_func(njk[j])
 
-        D2 = D - D1
-        D2_class_freq = {k: self.class_freq[k] -
-                         D1_class_freq[k] for k in self.class_freq}
-
-        m = 0
-        if D1 > 0:
-            m += D1/D * metric_func(D1_class_freq)
-        if D2 > 0:
-            m += D2/D * metric_func(D2_class_freq)
         return m
 
     def trace_down_to_leaf(self, x):
@@ -61,10 +66,10 @@ class EfdtNode(VfdtNode):
         best_split_attr = None
         best_split_value = None
         best_metric_val = float('-inf')
-        for attr in self.candidate_attr:
+        for i, attr in enumerate(self.candidate_attr):
             if attr.type == AttrType.NONE:
                 continue
-            njk = self.nijk[attr.name]
+            njk = self.nijk[i]
             split_metric, split_value = splitting_metric(
                 attr.type, njk, metric_func, self.total_sample, self.class_freq)
             if split_metric > best_metric_val:
@@ -87,10 +92,10 @@ class EfdtNode(VfdtNode):
         best_split_attr = None
         best_split_value = None
         best_metric_val = float('-inf')
-        for attr in self.candidate_attr:
+        for i, attr in enumerate(self.candidate_attr):
             if attr.type == AttrType.NONE:
                 continue
-            njk = self.nijk[attr.name]
+            njk = self.nijk[i]
             split_metric, split_value = splitting_metric(
                 attr.type, njk, metric_func, self.total_sample, self.class_freq)
             if split_metric > best_metric_val:
@@ -103,7 +108,6 @@ class EfdtNode(VfdtNode):
 
         if metric0 > best_metric_val:
             if metric0 - current_metric > epsilon or (tau is not None and epsilon < tau and metric0 - current_metric > tau/2):
-                print('cut')
                 self.cut()
                 return True
         else:
@@ -114,16 +118,24 @@ class EfdtNode(VfdtNode):
         return False
 
     def cut(self):
-        self.left_child = None
-        self.right_child = None
+        self.children = []
 
     def split(self, best_split_attr, best_split_value):
         # TODO: binary split, should we discard splitting attribute?
         # TODO: how to do prediction for leaf after just splitting?
         self.split_attr = best_split_attr
         self.split_value = best_split_value
-        self.left_child = EfdtNode(self.candidate_attr, self)
-        self.right_child = EfdtNode(self.candidate_attr, self)
+
+        if best_split_attr.type == AttrType.CATE:
+            candidate_attr = deepcopy(self.candidate_attr)
+            candidate_attr.pop(self.candidate_attr.index(best_split_attr))
+            self.children = [EfdtNode(candidate_attr, self)
+                             for v in best_split_attr.values]
+        elif best_split_attr.type == AttrType.NUME:
+            self.children = [EfdtNode(deepcopy(self.candidate_attr), self), EfdtNode(
+                deepcopy(self.candidate_attr), self)]
+        else:
+            raise NotImplementedError
 
 
 class EfdtTree(VfdtTree):
