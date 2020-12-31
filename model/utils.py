@@ -13,6 +13,9 @@ class Attr:
         self.index = index
         self.name = name if name is not None else self.index
         self.type = type
+    
+    def print(self):
+        print('Attr<%d, %s, %s>' % (self.index, self.name, self.type))
 
 
 def hoeffing_bound(metric_func, n_class, delta, n):

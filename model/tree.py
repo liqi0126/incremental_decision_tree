@@ -56,7 +56,10 @@ class ClsNode:
         try:
             return max(self.class_freq, key=self.class_freq.get)
         except ValueError:
-            return self.parent.most_freq()
+            if self.parent is not None:
+                return self.parent.most_freq()
+            else:
+                return None
 
     def recur_splitting(self, X, y, metric_func, max_depth, min_sample):
         self.total_sample = len(y)

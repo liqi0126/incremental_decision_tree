@@ -26,10 +26,8 @@ class EvaluatePrequential:
             count += 1
             if count % self.freq == 0:
                 accuracy = self.evaluator.performance()
-                self.performance.append(accuracy)
+                # error rate
+                self.performance.append(1 - accuracy)
                 print(count, accuracy)
 
         return self.performance
-
-    def plot(self):
-        print(self.performance)
