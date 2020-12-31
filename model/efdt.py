@@ -79,6 +79,7 @@ class EfdtNode(VfdtNode):
             self.split(best_split_attr, best_split_value)
 
     def reevaluate_best_split(self, metric_func, n_class, delta):
+        metric0 = metric_func(self.class_freq)
         current_metric = self.current_split_metric(metric_func)
 
         best_split_attr = None
@@ -98,8 +99,20 @@ class EfdtNode(VfdtNode):
         epsilon = hoeffing_bound(metric_func, n_class,
                                  delta, self.total_sample)
 
-        if best_metric_val - current_metric > epsilon:
-            self.split(best_split_attr, best_split_value)
+        if metric0 > best_metric_val:
+            if metric0 - current_metric > epsilon:
+                self.cut()
+                return True
+        else:
+            if best_metric_val - current_metric > epsilon:
+                self.split(best_split_attr, best_split_value)
+                return True
+                
+        return False
+
+    def cut(self):
+        self.left_child = None
+        self.right_child = None
 
     def split(self, best_split_attr, best_split_value):
         # TODO: binary split, should we discard splitting attribute?
