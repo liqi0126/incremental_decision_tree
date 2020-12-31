@@ -3,7 +3,8 @@
 ## Run
 
 ```
-python main.py [-h] --tree TREE [TREE ...] --dataset DATASET
+main.py [-h] [--tree {v,e,vfdt,efdt} [{v,e,vfdt,efdt} ...]]
+        [--dataset DATASET] [--max_instance MAX_INSTANCE] [--exp EXP]
 ```
 
 - `TREE`: `v` or `e` or `efdt` or `vfdt`
