@@ -5,9 +5,10 @@ from metrics.utils import splitting_metric
 
 from copy import deepcopy
 
+
 class EfdtNode(VfdtNode):
-    def __init__(self, candidate_attr, parent):
-        super().__init__(candidate_attr, parent)
+    def __init__(self, candidate_attr, parent, init_class_freq=None):
+        super().__init__(candidate_attr, parent, init_class_freq)
 
     def current_split_metric(self, metric_func):
         attr = self.split_attr
@@ -54,6 +55,7 @@ class EfdtNode(VfdtNode):
         return path
 
     def attempt_to_split(self, metric_func, n_class, delta, max_depth, min_sample, tau=None):
+        if len(self.candidate_attr) == 0: return
         if self.depth > max_depth:
             return
         if self.total_sample < min_sample:
@@ -86,6 +88,8 @@ class EfdtNode(VfdtNode):
             self.split(best_split_attr, best_split_value)
 
     def reevaluate_best_split(self, metric_func, n_class, delta, tau=None):
+        if len(self.candidate_attr) == 0: return
+
         metric0 = metric_func(self.class_freq)
         current_metric = self.current_split_metric(metric_func)
 
@@ -143,7 +147,11 @@ class EfdtTree(VfdtTree):
         super().__init__(candidate_attr, n_class, delta, max_depth, min_sample, tau)
         self.root = EfdtNode(candidate_attr, parent=None)
 
+        self.instance_count = 0
+
     def _update(self, _x, _y, metric_func):
+        self.instance_count += 1
+
         path = self.root.trace_down_to_leaf(_x)
         for node in path:
             node.add_sample(_x, _y)
@@ -151,10 +159,11 @@ class EfdtTree(VfdtTree):
                 node.attempt_to_split(
                     metric_func, self.n_class, self.delta, self.max_depth, self.min_sample, self.tau)
             else:
-                success = node.reevaluate_best_split(
-                    metric_func, self.n_class, self.delta, self.tau)
-                if success:
-                    break
+                if self.instance_count % 100 == 0:
+                    success = node.reevaluate_best_split(
+                        metric_func, self.n_class, self.delta, self.tau)
+                    if success:
+                        break
 
     def _predict(self, x):
         return self.root.trace_down_to_leaf(x)[-1].most_freq()

@@ -6,10 +6,12 @@ from copy import deepcopy
 
 
 class VfdtNode(ClsNode):
-    def __init__(self, candidate_attr, parent):
+    def __init__(self, candidate_attr, parent, init_class_freq=None):
         super().__init__(candidate_attr, parent)
         # TODO: how to deal with continuous value?
         self.nijk = [{} for attr in candidate_attr]
+        if init_class_freq is not None:
+            self.class_freq = init_class_freq
 
     def add_sample(self, x, y):
         if y not in self.class_freq:
@@ -30,6 +32,8 @@ class VfdtNode(ClsNode):
                     self.nijk[i][j][y] += 1
 
     def attempt_to_split(self, metric_func, n_class, delta, max_depth, min_sample, tau=None):
+        if len(self.candidate_attr) == 0: return
+
         if self.depth > max_depth:
             return
 
