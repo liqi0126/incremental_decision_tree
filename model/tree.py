@@ -126,7 +126,7 @@ class ClsNode:
     def print(self):
         head = '    ' * self.depth
         if self.is_leaf():
-            print(head + str(self.most_freq()))
+            print(head + str(self.most_freq()), self.class_freq)
         else:
             if self.split_attr.type == AttrType.CATE:
                 left_symbol = '=='

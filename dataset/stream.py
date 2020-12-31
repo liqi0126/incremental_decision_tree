@@ -40,3 +40,7 @@ class DataStream:
             self.pointer = 0
 
         return x, y
+    
+    def reset(self):
+        self.pointer = 0
+

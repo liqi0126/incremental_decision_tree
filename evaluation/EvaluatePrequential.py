@@ -12,6 +12,7 @@ class EvaluatePrequential:
         self.max_inst = max_inst
 
     def doMainTask(self):
+        self.stream.reset()
         count = 0
         self.performance = []
         while count < self.max_inst:

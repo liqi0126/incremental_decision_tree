@@ -40,8 +40,9 @@ if __name__ == '__main__':
 
     # hyperparameter
     delta = 0.01
-    max_depth = 100
+    max_depth = 20
     min_sample = 5
+    tau = 0.05
     def metric_func(class_freq): return -gini(class_freq)
 
     learners = []
@@ -55,11 +56,11 @@ if __name__ == '__main__':
     
     for i, learner in enumerate(learners):
         print(legend[i])
-        model = learner(candidate_attr, n_class, delta, max_depth, min_sample)
+        model = learner(candidate_attr, n_class, delta, max_depth, min_sample, tau)
         eval = EvaluatePrequential(stream, model, metric_func, max_inst=args.max_instance)
         performance = eval.doMainTask()
         plt.plot(performance)
-        model.print()
+        # model.print()
 
     plt.title("%s dataset" % args.dataset) 
     plt.xlabel("instances \\times 1000") 

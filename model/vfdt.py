@@ -91,4 +91,4 @@ class VfdtTree(ClsTree):
     def _update(self, _x, _y, metric_func):
         leaf = self.root.trace_down_to_leaf(_x)
         leaf.add_sample(_x, _y)
-        leaf.attempt_to_split(metric_func, self.n_class, self.delta, self.max_depth, self.min_sample)
+        leaf.attempt_to_split(metric_func, self.n_class, self.delta, self.max_depth, self.min_sample, self.tau)

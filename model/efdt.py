@@ -48,7 +48,7 @@ class EfdtNode(VfdtNode):
             path.append(node)
         return path
 
-    def attempt_to_split(self, metric_func, n_class, delta, max_depth, min_sample):
+    def attempt_to_split(self, metric_func, n_class, delta, max_depth, min_sample, tau=None):
         if self.depth > max_depth:
             return
         if self.total_sample < min_sample:
@@ -75,10 +75,10 @@ class EfdtNode(VfdtNode):
         epsilon = hoeffing_bound(metric_func, n_class,
                                  delta, self.total_sample)
 
-        if best_metric_val - metric0 > epsilon:
+        if best_metric_val - metric0 > epsilon or (tau is not None and 0 < best_metric_val - metric0 < epsilon < tau):
             self.split(best_split_attr, best_split_value)
 
-    def reevaluate_best_split(self, metric_func, n_class, delta):
+    def reevaluate_best_split(self, metric_func, n_class, delta, tau=None):
         metric0 = metric_func(self.class_freq)
         current_metric = self.current_split_metric(metric_func)
 
@@ -107,7 +107,7 @@ class EfdtNode(VfdtNode):
             if best_metric_val - current_metric > epsilon:
                 self.split(best_split_attr, best_split_value)
                 return True
-                
+
         return False
 
     def cut(self):
@@ -124,8 +124,8 @@ class EfdtNode(VfdtNode):
 
 
 class EfdtTree(VfdtTree):
-    def __init__(self, candidate_attr, n_class, delta, max_depth=100, min_sample=5):
-        super().__init__(candidate_attr, n_class, delta, max_depth, min_sample)
+    def __init__(self, candidate_attr, n_class, delta, max_depth=100, min_sample=5, tau=None):
+        super().__init__(candidate_attr, n_class, delta, max_depth, min_sample, tau)
         self.root = EfdtNode(candidate_attr, parent=None)
 
     def _update(self, _x, _y, metric_func):
@@ -134,10 +134,10 @@ class EfdtTree(VfdtTree):
             node.add_sample(_x, _y)
             if node.is_leaf():
                 node.attempt_to_split(
-                    metric_func, self.n_class, self.delta, self.max_depth, self.min_sample)
+                    metric_func, self.n_class, self.delta, self.max_depth, self.min_sample, self.tau)
             else:
                 success = node.reevaluate_best_split(
-                    metric_func, self.n_class, self.delta)
+                    metric_func, self.n_class, self.delta, self.tau)
                 if success:
                     break
 
