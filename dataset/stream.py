@@ -8,6 +8,9 @@ from collections import Counter
 class DataStream:
     def __init__(self, infile, attrTypes=None, shuffle=False, seed=0, cyclic=False):
         df = pd.read_csv(infile)
+
+        self.shuffle = shuffle
+        self.seed = seed
         
         if shuffle:
             df = df.sample(frac=1, random_state=seed)

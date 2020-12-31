@@ -75,7 +75,9 @@ class EfdtNode(VfdtNode):
         epsilon = hoeffing_bound(metric_func, n_class,
                                  delta, self.total_sample)
 
-        if best_metric_val - metric0 > epsilon or (tau is not None and 0 < best_metric_val - metric0 < epsilon < tau):
+        # if best_metric_val - metric0 > epsilon:
+        # if best_metric_val - metric0 > epsilon or (tau is not None and 0 < best_metric_val - metric0 < epsilon < tau):
+        if best_metric_val - metric0 > epsilon or (tau is not None and epsilon < tau):
             self.split(best_split_attr, best_split_value)
 
     def reevaluate_best_split(self, metric_func, n_class, delta, tau=None):
@@ -100,11 +102,12 @@ class EfdtNode(VfdtNode):
                                  delta, self.total_sample)
 
         if metric0 > best_metric_val:
-            if metric0 - current_metric > epsilon:
+            if metric0 - current_metric > epsilon or (tau is not None and epsilon < tau and metric0 - current_metric > tau/2):
+                print('cut')
                 self.cut()
                 return True
         else:
-            if best_metric_val - current_metric > epsilon:
+            if best_metric_val - current_metric > epsilon or (tau is not None and epsilon < tau and best_metric_val - current_metric > tau/2):
                 self.split(best_split_attr, best_split_value)
                 return True
 
