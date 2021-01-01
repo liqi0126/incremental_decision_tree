@@ -115,8 +115,7 @@ class ClsNode:
                 candidate_attr = deepcopy(self.candidate_attr)
                 candidate_attr.pop(self.candidate_attr.index(best_split_attr))
                 self.children.append(ClsNode(candidate_attr, self))
-                self.children[-1].recur_splitting(X[index],
-                                                  y[index], metric_func, max_depth, min_sample)
+                self.children[-1].recur_splitting(X[index], y[index], metric_func, max_depth, min_sample)
 
         elif best_split_attr.type == AttrType.NUME:
             left_index = np.array(
@@ -133,23 +132,22 @@ class ClsNode:
             raise NotImplementedError
 
     def print(self):
+        tree_plot = ''
         head = '    ' * self.depth
         if self.is_leaf():
-            print(head + str(self.most_freq()), self.class_freq)
+            tree_plot += head + str(self.most_freq()) + str(self.class_freq) + '\n'
         else:
             if self.split_attr.type == AttrType.NUME:
-                print(head + str(self.split_attr.name) +
-                      '<' + str(self.split_value))
-                self.children[0].print()
-                print(head + str(self.split_attr.name) +
-                      '>=' + str(self.split_value))
-                self.children[1].print()
+                tree_plot += head + str(self.split_attr.name) + '<' + str(self.split_value) + '\n'
+                tree_plot += self.children[0].print()
+                tree_plot += head + str(self.split_attr.name) + '>=' + str(self.split_value) + '\n'
+                tree_plot += self.children[1].print()
 
             elif self.split_attr.type == AttrType.CATE:
                 for i, c in enumerate(self.children):
-                    print(head + str(self.split_attr.name) +
-                          '==' + str(self.split_attr.values[i]))
-                    c.print()
+                    tree_plot += head + str(self.split_attr.name) + '==' + str(self.split_attr.values[i]) + '\n'
+                    tree_plot += c.print()
+        return tree_plot
 
 
 class ClsTree:
@@ -169,4 +167,4 @@ class ClsTree:
         return self.root.trace_down_to_leaf(x).most_freq()
 
     def print(self):
-        self.root.print()
+        return self.root.print()
