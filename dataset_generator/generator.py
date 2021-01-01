@@ -20,7 +20,7 @@ def arff2csv(arff_path, csv_path=None, _encoding='utf8'):
         with open(csv_path, 'w', encoding=_encoding) as fw:
             for line in fr.readlines():
                 if write_sw:
-                    fw.write(line)
+                    fw.write(line.replace('value','').replace('class','')[:-2]+'\n')
                 elif '@data' in line:
                     fw.write(','.join(attributes))
                     write_sw = True
