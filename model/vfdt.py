@@ -9,7 +9,7 @@ class VfdtNode(ClsNode):
     def __init__(self, candidate_attr, parent, init_class_freq=None):
         super().__init__(candidate_attr, parent)
         # TODO: how to deal with continuous value?
-        self.nijk = [{} for _ in candidate_attr]
+        self.nijk = [{} for _git s in candidate_attr]
         if init_class_freq is not None:
             self.class_freq = init_class_freq
 
