@@ -35,6 +35,8 @@ if __name__ == '__main__':
 
     if args.dataset == 'poker':
         attrTypes = [AttrType.CATE] * 10
+    elif args.dataset.startswith('moa'):
+        attrTypes = [AttrType.CATE] * 5
     else:
         attrTypes = None
     stream = DataStream(dataset.config.csv_path[args.dataset], attrTypes=attrTypes, shuffle=True)
