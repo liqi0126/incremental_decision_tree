@@ -7,7 +7,7 @@ class EvaluatePrequential:
         self.n_learners = len(learners)
         self.learners = learners
         self.learner_metric = learner_metric
-        self.evaluators = [ evaluator() for i in range(self.n_learners) ]
+        self.evaluators = [evaluator() for _ in range(self.n_learners)]
 
         self.freq = freq
         self.max_inst = max_inst
@@ -17,7 +17,7 @@ class EvaluatePrequential:
     def doMainTask(self):
         self.stream.reset()
         count = 0
-        self.performances = [ [] for i in range(self.n_learners) ]
+        self.performances = [[] for _ in range(self.n_learners)]
 
         if self.output_func is not None:
             self.output_func(self.performances)
@@ -43,7 +43,7 @@ class EvaluatePrequential:
                     print(accuracy, end=" ")
             
             if count % self.freq == 0:
-                print("")
+                print()
                 if self.output_func is not None:
                     self.output_func(self.performances)
 

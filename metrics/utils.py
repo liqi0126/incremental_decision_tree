@@ -70,9 +70,6 @@ def splitting_metric_nume(njk, metric_func, total_sample, class_freq):
 
 
 def splitting_metric_cate(njk, metric_func, total_sample, class_freq):
-    best_metric = float('-inf')
-    best_split = None
-
     D = total_sample
     m = 0
     for j in njk:

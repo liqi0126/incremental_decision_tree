@@ -55,7 +55,8 @@ class EfdtNode(VfdtNode):
         return path
 
     def attempt_to_split(self, metric_func, n_class, delta, max_depth, min_sample, tau=None):
-        if len(self.candidate_attr) == 0: return
+        if len(self.candidate_attr) == 0:
+            return
         if self.depth > max_depth:
             return
         if self.total_sample < min_sample:
