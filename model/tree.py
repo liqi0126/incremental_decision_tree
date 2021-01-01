@@ -12,7 +12,7 @@ class ClsNode:
         self.parent = parent
         self.children = []
 
-        self.candidate_attr = candidate_attr
+        self.candidate_attr = deepcopy(candidate_attr)
 
         self.depth = parent.depth + 1 if parent is not None else 0
 

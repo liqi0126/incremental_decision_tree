@@ -55,7 +55,8 @@ class EfdtNode(VfdtNode):
         return path
 
     def attempt_to_split(self, metric_func, n_class, delta, max_depth, min_sample, tau=None):
-        if len(self.candidate_attr) == 0: return
+        if len(self.candidate_attr) == 0:
+            return
         if self.depth > max_depth:
             return
         if self.total_sample < min_sample:
@@ -88,7 +89,8 @@ class EfdtNode(VfdtNode):
             self.split(best_split_attr, best_split_value)
 
     def reevaluate_best_split(self, metric_func, n_class, delta, tau=None):
-        if len(self.candidate_attr) == 0: return
+        if len(self.candidate_attr) == 0:
+            return
 
         metric0 = metric_func(self.class_freq)
         current_metric = self.current_split_metric(metric_func)
@@ -131,10 +133,12 @@ class EfdtNode(VfdtNode):
         self.split_value = best_split_value
 
         if best_split_attr.type == AttrType.CATE:
-            candidate_attr = deepcopy(self.candidate_attr)
-            candidate_attr.pop(self.candidate_attr.index(best_split_attr))
-            self.children = [EfdtNode(candidate_attr, self)
-                             for v in best_split_attr.values]
+            self.children = []
+            for v in best_split_attr.values:
+                candidate_attr = deepcopy(self.candidate_attr)
+                candidate_attr.pop(self.candidate_attr.index(best_split_attr))
+                self.children.append(EfdtNode(
+                    candidate_attr, self))
         elif best_split_attr.type == AttrType.NUME:
             self.children = [EfdtNode(deepcopy(self.candidate_attr), self), EfdtNode(
                 deepcopy(self.candidate_attr), self)]

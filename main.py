@@ -14,6 +14,7 @@ import datetime
 import argparse
 import pickle
 from matplotlib import pyplot as plt
+from copy import deepcopy
 
 
 def arg_parse():
@@ -35,6 +36,8 @@ if __name__ == '__main__':
 
     if args.dataset == 'poker':
         attrTypes = [AttrType.CATE] * 10
+    elif args.dataset.startswith('moa'):
+        attrTypes = [AttrType.CATE] * 5
     else:
         attrTypes = None
     stream = DataStream(
@@ -62,7 +65,7 @@ if __name__ == '__main__':
 
     learners = []
     for i, model in enumerate(models):
-        learners.append(model(candidate_attr, n_class,
+        learners.append(model(deepcopy(candidate_attr), n_class,
                               delta, max_depth, min_sample, tau))
 
     def output(performances):
