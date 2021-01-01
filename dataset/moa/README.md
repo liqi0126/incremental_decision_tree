@@ -7,12 +7,13 @@
 ##### 使用方法
 
 ```bash
-$ python ./generator.py [-n N]
+$ python ./generator.py [-n N] [-d D]
 ```
 
 将分别生成四个数据集dataset1.csv ~ dataset4.csv
 
 每个数据集的配置为：包含5个属性、每个属性包含5个离散的取值、将生成N条数据（默认值为5000）、dataset[i].csv中对应一个[i + 1]分类问题的数据集。
+如果设置了-d属性，则会产生D次漂移。（默认D = 0）
 
 ##### 已生成的数据集
 
