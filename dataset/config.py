@@ -5,6 +5,7 @@ csv_path = {
     'poker': './dataset/poker/poker.csv',
     'activity_prediction': './dataset/activity_prediction/activity_prediction.csv',
     'activity_recognition': './dataset/activity_recognition/activity_recognition.csv',
+    'moa1': './dataset/moa/small_dataset1.csv',
     'moa2': './dataset/moa/dataset1.csv',
     'moa3': './dataset/moa/dataset2.csv',
     'moa4': './dataset/moa/dataset3.csv',
