@@ -59,7 +59,9 @@ if __name__ == '__main__':
     max_depth = 100
     min_sample = 5
     tau = 0.05
-    def metric_func(class_freq): return -gini(np.fromiter(class_freq.values(), dtype=int))
+
+    def metric_func(class_freq):
+        return -gini(np.fromiter(class_freq.values(), dtype=int))
     # def metric_func(class_freq): return -gini(class_freq)
 
     models = []

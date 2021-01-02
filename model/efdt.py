@@ -54,15 +54,21 @@ class EfdtNode(VfdtNode):
             path.append(node)
         return path
 
-    def attempt_to_split(self, metric_func, n_class, delta, max_depth, min_sample, tau=None):
+    def attempt_to_split(self, metric_func, n_class, delta, max_depth, min_sample, grace_period, tau=None):
         if len(self.candidate_attr) == 0:
             return
-        if self.depth > max_depth:
+        if self.depth is not None and self.depth > max_depth:
             return
         if self.total_sample < min_sample:
             return
         if len(self.class_freq) == 1:
             return
+
+        self.instance_count += 1
+        if self.instance_count % grace_period != 0:
+            return
+        else:
+            self.instance_count = 0
 
         metric0 = metric_func(self.class_freq)
 
@@ -88,8 +94,15 @@ class EfdtNode(VfdtNode):
         if best_metric_val - metric0 > epsilon or (tau is not None and epsilon < tau):
             self.split(best_split_attr, best_split_value)
 
-    def reevaluate_best_split(self, metric_func, n_class, delta, tau=None):
-        if len(self.candidate_attr) == 0: return
+    def reevaluate_best_split(self, metric_func, n_class, delta, min_samples_reevaluate, tau=None):
+        if len(self.candidate_attr) == 0:
+            return
+
+        self.instance_count += 1
+        if self.instance_count % min_samples_reevaluate != 0:
+            return
+        else:
+            self.instance_count = 0
 
         metric0 = metric_func(self.class_freq)
         current_metric = self.current_split_metric(metric_func)
@@ -132,10 +145,16 @@ class EfdtNode(VfdtNode):
         self.split_value = best_split_value
 
         if best_split_attr.type == AttrType.CATE:
-            candidate_attr = deepcopy(self.candidate_attr)
-            candidate_attr.pop(self.candidate_attr.index(best_split_attr))
-            self.children = [EfdtNode(candidate_attr, self)
-                             for v in best_split_attr.values]
+            # candidate_attr = deepcopy(self.candidate_attr)
+            # candidate_attr.pop(self.candidate_attr.index(best_split_attr))
+            # self.children = [EfdtNode(candidate_attr, self) for v in best_split_attr.values]
+
+            self.children = []
+            for _ in best_split_attr.values:
+                candidate_attr = deepcopy(self.candidate_attr)
+                candidate_attr.pop(self.candidate_attr.index(best_split_attr))
+                self.children.append(EfdtNode(
+                    candidate_attr, self))
         elif best_split_attr.type == AttrType.NUME:
             self.children = [EfdtNode(deepcopy(self.candidate_attr), self), EfdtNode(
                 deepcopy(self.candidate_attr), self)]
@@ -144,27 +163,22 @@ class EfdtNode(VfdtNode):
 
 
 class EfdtTree(VfdtTree):
-    def __init__(self, candidate_attr, n_class, delta, max_depth=100, min_sample=5, tau=None):
-        super().__init__(candidate_attr, n_class, delta, max_depth, min_sample, tau)
+    def __init__(self, candidate_attr, n_class, delta, min_samples_reevaluate=20, grace_period=100, max_depth=100, min_sample=5, tau=None):
+        super().__init__(candidate_attr, n_class, delta, grace_period, max_depth, min_sample, tau)
         self.root = EfdtNode(candidate_attr, parent=None)
-
-        self.instance_count = 0
+        self.min_samples_reevaluate = min_samples_reevaluate
 
     def _update(self, _x, _y, metric_func):
-        self.instance_count += 1
-
         path = self.root.trace_down_to_leaf(_x)
         for node in path:
             node.add_sample(_x, _y)
             if node.is_leaf():
                 node.attempt_to_split(
-                    metric_func, self.n_class, self.delta, self.max_depth, self.min_sample, self.tau)
+                    metric_func, self.n_class, self.delta, self.max_depth, self.min_sample, self.grace_period, self.tau)
             else:
-                if self.instance_count % 100 == 0:
-                    success = node.reevaluate_best_split(
-                        metric_func, self.n_class, self.delta, self.tau)
-                    if success:
-                        break
+                success = node.reevaluate_best_split(metric_func, self.n_class, self.delta, self.min_samples_reevaluate, self.tau)
+                if success:
+                    break
 
     def _predict(self, x):
         return self.root.trace_down_to_leaf(x)[-1].most_freq()

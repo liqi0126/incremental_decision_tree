@@ -63,7 +63,7 @@ class ClsNode:
         self.total_sample = len(y)
         self.class_freq = Counter(y)
 
-        if self.depth > max_depth:
+        if self.depth is not None and self.depth > max_depth:
             return
 
         if self.total_sample < min_sample:
@@ -165,6 +165,9 @@ class ClsTree:
 
     def _predict(self, x):
         return self.root.trace_down_to_leaf(x).most_freq()
+
+    def predict_one(self, x):
+        return self._predict(x)
 
     def print(self):
         return self.root.print()

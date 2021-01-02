@@ -12,6 +12,7 @@ class VfdtNode(ClsNode):
         self.nijk = [{} for _ in candidate_attr]
         if init_class_freq is not None:
             self.class_freq = init_class_freq
+        self.instance_count = 0
 
     def add_sample(self, x, y):
         if y not in self.class_freq:
@@ -31,11 +32,11 @@ class VfdtNode(ClsNode):
                 else:
                     self.nijk[i][j][y] += 1
 
-    def attempt_to_split(self, metric_func, n_class, delta, max_depth, min_sample, tau=None):
+    def attempt_to_split(self, metric_func, n_class, delta, max_depth, min_sample, grace_period, tau=None):
         if len(self.candidate_attr) == 0:
             return
 
-        if self.depth > max_depth:
+        if self.depth is not None and self.depth > max_depth:
             return
 
         if self.total_sample < min_sample:
@@ -43,6 +44,12 @@ class VfdtNode(ClsNode):
 
         if len(self.class_freq) == 1:
             return
+
+        self.instance_count += 1
+        if self.instance_count % grace_period != 0:
+            return
+        else:
+            self.instance_count = 0
 
         # TODO: what G_m means in the paper?
         metric0 = metric_func(self.class_freq)
@@ -91,10 +98,10 @@ class VfdtNode(ClsNode):
 
 
 class VfdtTree(ClsTree):
-    def __init__(self, candidate_attr, n_class, delta, max_depth=100, min_sample=5, tau=None):
+    def __init__(self, candidate_attr, n_class, delta, grace_period=100, max_depth=100, min_sample=5, tau=None):
         super().__init__(max_depth=max_depth, min_sample=min_sample)
         self.root = VfdtNode(candidate_attr, parent=None)
-
+        self.grace_period = grace_period
         self.n_class = n_class
         self.delta = delta
         self.tau = tau
@@ -106,5 +113,7 @@ class VfdtTree(ClsTree):
     def _update(self, _x, _y, metric_func):
         leaf = self.root.trace_down_to_leaf(_x)
         leaf.add_sample(_x, _y)
-        leaf.attempt_to_split(metric_func, self.n_class,
-                              self.delta, self.max_depth, self.min_sample, self.tau)
+        leaf.attempt_to_split(metric_func, self.n_class, self.delta, self.max_depth, self.min_sample, self.grace_period, self.tau)
+
+    def learn_one(self, x, y, metric_func):
+        self._update(x, y, metric_func)
