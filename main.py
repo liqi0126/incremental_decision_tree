@@ -109,6 +109,9 @@ if __name__ == '__main__':
     eval = EvaluatePrequential(
         stream, learners, metric_func, max_inst=args.max_instance, output_func=output)
     performances = eval.doMainTask()
+
+    print('Total time: ', time.time() - start_time)
+
     for line in performances:
         plt.plot(line)
     
@@ -121,4 +124,3 @@ if __name__ == '__main__':
     plt.legend(labels=legend)
     plt.show()
 
-    print('Total time: ', time.time() - start_time)
