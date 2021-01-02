@@ -22,6 +22,7 @@ from river import tree
 def arg_parse():
     parser = argparse.ArgumentParser(description='Incremental Decision Tree')
     parser.add_argument("--seed", type=int, default=4096)
+    parser.add_argument("--shuffle", action='store_true')
     parser.add_argument('--tree', nargs='+', type=str,
                         choices=['v', 'e', 'vfdt', 'efdt', 'river-v', 'river-e'], default=['v', 'e'])
     parser.add_argument('--dataset', type=str, default='forest')
@@ -36,6 +37,8 @@ if __name__ == '__main__':
 
     args = arg_parse()
     args.exp = args.dataset + '_' + args.exp
+    if args.shuffle:
+        args.exp += '_shuffle'
 
     np.random.seed(args.seed)
     random.seed(args.seed)
@@ -48,7 +51,7 @@ if __name__ == '__main__':
     #     attrTypes = [AttrType.CATE] * 54
     else:
         attrTypes = None
-    stream = DataStream(dataset.config.csv_path[args.dataset], attrTypes=attrTypes, shuffle=False)
+    stream = DataStream(dataset.config.csv_path[args.dataset], attrTypes=attrTypes, shuffle=args.shuffle)
     candidate_attr, n_class = stream.attributes, stream.n_class
 
     for attr in candidate_attr:
