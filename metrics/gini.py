@@ -1,8 +1,11 @@
+from numba import jit
+import numpy as np
 
+@jit(nopython=True)
 def gini(class_freq, total=None):
-    g = 1
+    g = np.float(1.)
     if total is None:
-        total = sum(class_freq.values())
-    for k in class_freq.values():
+        total = np.sum(class_freq)
+    for k in class_freq:
         g -= (k/total)**2
     return g

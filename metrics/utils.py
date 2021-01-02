@@ -1,5 +1,5 @@
 import numpy as np
-
+from numba import jit
 from model.utils import AttrType
 
 
@@ -31,30 +31,37 @@ def splitting_metric(attr_type, njk, metric_func, total_sample=None, class_freq=
         total_sample = sum(class_freq.values())
 
     if attr_type == AttrType.NUME:
-        return splitting_metric_nume(njk, metric_func, total_sample, class_freq)
+        return splitting_metric_nume(njk, np.fromiter(njk.keys(), dtype=float), metric_func, total_sample, class_freq)
     elif attr_type == AttrType.CATE:
         return splitting_metric_cate(njk, metric_func, total_sample, class_freq)
 
-
-def splitting_metric_nume(njk, metric_func, total_sample, class_freq):
-    best_metric = float('-inf')
+# @jit(nopython=True)
+def splitting_metric_nume(njk, values, metric_func, total_sample, class_freq):
+    best_metric = -1000000.
     best_split = None
 
-    sorted_value = np.array(sorted(njk.keys()))
+    # sorted_value = njk.keys()
+    sorted_value = np.sort(values)
     split_value = (sorted_value[:-1] + sorted_value[1:]) / 2
-
+    # if len(split_value) > 5:
+    #     split_value = split_value[::len(split_value)//5]
     D = total_sample
     D1 = 0
-    D1_class_freq = {k: 0 for k in class_freq}
+    D1_class_freq = {}
+    for k in class_freq:
+        D1_class_freq[k] = 0
     for index in range(len(split_value)):
         nk = njk[sorted_value[index]]
         for k in nk:
-            D1_class_freq[k] += nk[k]
+            # D1_class_freq[k] += nk[k]
             D1 += nk[k]
 
         D2 = D - D1
-        D2_class_freq = {k: class_freq[k] -
-                         D1_class_freq[k] for k in class_freq}
+        D2_class_freq = {}
+        for k in class_freq:
+            D2_class_freq[k] = class_freq[k] - D1_class_freq[k]
+        # D2_class_freq = {k: class_freq[k] -
+        #                  D1_class_freq[k] for k in class_freq}
 
         m = 0
         if D1 > 0:
@@ -67,7 +74,6 @@ def splitting_metric_nume(njk, metric_func, total_sample, class_freq):
             best_split = split_value[index]
 
     return [best_metric, best_split]
-
 
 def splitting_metric_cate(njk, metric_func, total_sample, class_freq):
     D = total_sample

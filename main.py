@@ -4,8 +4,7 @@ from evaluation.EvaluatePrequential import EvaluatePrequential
 
 from metrics.gini import gini
 
-from model.utils import Attr, AttrType
-from model.tree import ClsTree
+from model.utils import AttrType
 from model.vfdt import VfdtTree
 from model.efdt import EfdtTree
 
@@ -14,14 +13,19 @@ import datetime
 import argparse
 import pickle
 from matplotlib import pyplot as plt
+import numpy as np
+import random
+from copy import deepcopy
 
+from river import tree
 
 def arg_parse():
     parser = argparse.ArgumentParser(description='Incremental Decision Tree')
+    parser.add_argument("--seed", type=int, default=4096)
     parser.add_argument('--tree', nargs='+', type=str,
-                        choices=['v', 'e', 'vfdt', 'efdt'], default=['v', 'e'])
+                        choices=['v', 'e', 'vfdt', 'efdt', 'river-v', 'river-e'], default=['v', 'e'])
     parser.add_argument('--dataset', type=str, default='forest')
-    parser.add_argument('--max_instance', type=int, default=20000)
+    parser.add_argument('--max_instance', type=int, default=200000)
     parser.add_argument('--exp', type=str, default=datetime.datetime.strftime(
         datetime.datetime.now(), '%Y-%m-%d_%H:%M:%S'))
     return parser.parse_args()
@@ -33,11 +37,18 @@ if __name__ == '__main__':
     args = arg_parse()
     args.exp = args.dataset + '_' + args.exp
 
+    np.random.seed(args.seed)
+    random.seed(args.seed)
+
     if args.dataset == 'poker':
         attrTypes = [AttrType.CATE] * 10
+    elif args.dataset.startswith('moa'):
+        attrTypes = [AttrType.CATE] * 5
+    # elif args.dataset == 'forest':
+    #     attrTypes = [AttrType.CATE] * 54
     else:
         attrTypes = None
-    stream = DataStream(dataset.config.csv_path[args.dataset], attrTypes=attrTypes, shuffle=True)
+    stream = DataStream(dataset.config.csv_path[args.dataset], attrTypes=attrTypes, shuffle=False)
     candidate_attr, n_class = stream.attributes, stream.n_class
 
     for attr in candidate_attr:
@@ -48,7 +59,8 @@ if __name__ == '__main__':
     max_depth = 100
     min_sample = 5
     tau = 0.05
-    def metric_func(class_freq): return -gini(class_freq)
+    def metric_func(class_freq): return -gini(np.fromiter(class_freq.values(), dtype=int))
+    # def metric_func(class_freq): return -gini(class_freq)
 
     models = []
     legend = []
@@ -58,11 +70,21 @@ if __name__ == '__main__':
     if 'e' in args.tree or 'efdt' in args.tree:
         models.append(EfdtTree)
         legend.append('EFDT')
+    if 'river-v' in args.tree:
+        models.append(tree.HoeffdingAdaptiveTreeClassifier)
+        legend.append('RIVER-VFDT')
+    if 'river-e' in args.tree:
+        models.append(tree.ExtremelyFastDecisionTreeClassifier)
+        legend.append('RIVER-EFDT')
 
     learners = []
     for i, model in enumerate(models):
-        learners.append(model(candidate_attr, n_class,
-                              delta, max_depth, min_sample, tau))
+        learners.append(model(candidate_attr=deepcopy(candidate_attr),
+                              n_class=n_class,
+                              delta=delta,
+                              max_depth=max_depth,
+                              min_sample=min_sample,
+                              tau=tau))
 
     def output(performances):
         output_path = 'outputs/%s.pickle' % args.exp
