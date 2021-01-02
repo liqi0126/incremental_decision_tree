@@ -39,6 +39,7 @@ if __name__ == '__main__':
     args.exp = args.dataset + '_' + args.exp
     if args.shuffle:
         args.exp += '_shuffle'
+    args.exp += f'_seed{args.seed}'
 
     np.random.seed(args.seed)
     random.seed(args.seed)
