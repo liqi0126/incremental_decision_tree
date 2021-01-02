@@ -51,7 +51,7 @@ if __name__ == '__main__':
     #     attrTypes = [AttrType.CATE] * 54
     else:
         attrTypes = None
-    stream = DataStream(dataset.config.csv_path[args.dataset], attrTypes=attrTypes, shuffle=args.shuffle)
+    stream = DataStream(dataset.config.csv_path[args.dataset], attrTypes=attrTypes, shuffle=args.shuffle, seed=args.seed)
     candidate_attr, n_class = stream.attributes, stream.n_class
 
     for attr in candidate_attr:
