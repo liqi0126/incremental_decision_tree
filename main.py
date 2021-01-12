@@ -47,7 +47,7 @@ if __name__ == '__main__':
     if args.dataset == 'poker':
         attrTypes = [AttrType.CATE] * 10
     elif args.dataset.startswith('moa'):
-        attrTypes = [AttrType.CATE] * 5
+        attrTypes = [AttrType.NUME] * 5
     # elif args.dataset == 'forest':
     #     attrTypes = [AttrType.CATE] * 54
     else:
@@ -113,15 +113,15 @@ if __name__ == '__main__':
 
     print('Total time: ', time.time() - start_time)
 
-    for line in performances:
-        plt.plot(line)
+    # for line in performances:
+    #     plt.plot(line)
     
     # for learner in learners:
     #     learner.print()
 
-    plt.title("%s dataset" % args.dataset)
-    plt.xlabel("instances \\times 1000")
-    plt.ylabel("error rate")
-    plt.legend(labels=legend)
-    plt.show()
+    # plt.title("%s dataset" % args.dataset)
+    # plt.xlabel("instances \\times 1000")
+    # plt.ylabel("error rate")
+    # plt.legend(labels=legend)
+    # plt.show()
 
