@@ -48,6 +48,7 @@ if __name__ == '__main__':
         attrTypes = [AttrType.CATE] * 10
     elif args.dataset.startswith('moa'):
         attrTypes = [AttrType.NUME] * 5
+        # attrTypes = [AttrType.CATE] * 5
     # elif args.dataset == 'forest':
     #     attrTypes = [AttrType.CATE] * 54
     else:

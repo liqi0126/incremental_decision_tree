@@ -11,6 +11,9 @@ class VfdtNode(ClsNode):
         # TODO: how to deal with continuous value?
         self.nijk = [{} for _ in candidate_attr]
         self.nume_list = {attr.name: {'value': [], 'label': []} for attr in candidate_attr if attr.type == AttrType.NUME}
+        self.build_nume_threshold = 1
+        self.nume_count = 0
+
         if init_class_freq is not None:
             self.class_freq = init_class_freq
         self.instance_count = 0
@@ -80,23 +83,30 @@ class VfdtNode(ClsNode):
         best_split_value = None
         best_metric_val = float('-inf')
         second_metric_val = float('-inf')
+
+        self.nume_count += 1
         for i, attr in enumerate(self.candidate_attr):
-            if attr.type == AttrType.CATE:
-                njk = self.nijk[i]
-            elif attr.type == AttrType.NUME:
-                attr_list = self.nume_list[attr.name]
-                njk = self.build_nume_dict(attr_list, nume_max_class)
-                attr.values = list(njk.keys())
+            if attr.type == AttrType.NUME:
+                if self.nume_count == self.build_nume_threshold:
+                    attr_list = self.nume_list[attr.name]
+                    self.nijk[i] = self.build_nume_dict(attr_list, nume_max_class)
+                    attr.values = list(self.nijk[i].keys())
+                    # print(f'{attr.name} reevaluated, build_nume_threshold={self.build_nume_threshold}, attr_values={attr.values}')
+            elif attr.type == AttrType.CATE:
+                pass
             else:
                 continue
 
-            split_metric, split_value = splitting_metric(attr.type, njk, metric_func, self.total_sample, self.class_freq)
+            split_metric, split_value = splitting_metric(attr.type, self.nijk[i], metric_func, self.total_sample, self.class_freq)
             if split_metric > best_metric_val:
                 best_metric_val = split_metric
                 best_split_attr = attr
                 best_split_value = split_value
             elif best_metric_val > split_metric > second_metric_val:
                 second_metric_val = split_metric
+
+        if self.nume_count == self.build_nume_threshold:
+            self.build_nume_threshold *= 2
 
         epsilon = hoeffing_bound(metric_func, n_class,
                                  delta, self.total_sample)
