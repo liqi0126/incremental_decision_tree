@@ -62,7 +62,6 @@ if __name__ == '__main__':
     # hyperparameter
     delta = 0.01
     max_depth = 100
-    min_sample = 5
     tau = 0.05
 
     def metric_func(class_freq):
@@ -90,7 +89,6 @@ if __name__ == '__main__':
                               n_class=n_class,
                               delta=delta,
                               max_depth=max_depth,
-                              min_sample=min_sample,
                               tau=tau))
 
     def output(performances):
@@ -102,7 +100,6 @@ if __name__ == '__main__':
                 'seed': stream.seed,
                 'delta': delta,
                 'max_depth': max_depth,
-                'min_sample': min_sample,
                 'tau': tau,
                 'learners': legend,
                 'performances': performances,
@@ -114,15 +111,15 @@ if __name__ == '__main__':
 
     print('Total time: ', time.time() - start_time)
 
-    # for line in performances:
-    #     plt.plot(line)
+    for line in performances:
+        plt.plot(line)
     
-    # for learner in learners:
-    #     learner.print()
+    for learner in learners:
+        learner.print()
 
-    # plt.title("%s dataset" % args.dataset)
-    # plt.xlabel("instances \\times 1000")
-    # plt.ylabel("error rate")
-    # plt.legend(labels=legend)
-    # plt.show()
+    plt.title("%s dataset" % args.dataset)
+    plt.xlabel("instances \\times 1000")
+    plt.ylabel("error rate")
+    plt.legend(labels=legend)
+    plt.show()
 
