@@ -92,7 +92,7 @@ class VfdtNode(ClsNode):
                 continue
 
             split_metric, split_value = splitting_metric(
-                attr.type, self.nijk[i], metric_func, self.total_sample, class_freq=None)
+                attr.type, self.nijk[i], metric_func, self.total_sample, self.class_freq)
             if split_metric > best_metric_val:
                 second_metric_val = best_metric_val
                 best_metric_val = split_metric
@@ -123,7 +123,6 @@ class VfdtNode(ClsNode):
                 self.children.append(NodeType(
                         deepcopy(candidate_attr), 
                         parent=self,
-                        # init_class_freq=njk[v]
                     )
                 )
         elif best_split_attr.type == AttrType.NUME:
@@ -133,7 +132,6 @@ class VfdtNode(ClsNode):
                 self.children.append(NodeType(
                         deepcopy(self.candidate_attr), 
                         parent=self,
-                        # init_class_freq=njk[v]
                     )
                 )
         else:

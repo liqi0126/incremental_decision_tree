@@ -47,8 +47,8 @@ if __name__ == '__main__':
     if args.dataset == 'poker':
         attrTypes = [AttrType.CATE] * 10
     elif args.dataset.startswith('moa'):
-        attrTypes = [AttrType.NUME] * 5
-        # attrTypes = [AttrType.CATE] * 5
+        # attrTypes = [AttrType.NUME] * 5
+        attrTypes = [AttrType.CATE] * 5
     # elif args.dataset == 'forest':
     #     attrTypes = [AttrType.CATE] * 54
     else:
@@ -59,15 +59,10 @@ if __name__ == '__main__':
     for attr in candidate_attr:
         attr.print()
 
-    # hyperparameter
-    delta = 0.01
-    max_depth = 100
-    tau = 0.05
-
-    # def metric_func(class_freq):
-    #     return -gini(np.fromiter(class_freq.values(), dtype=int))
     def metric_func(class_freq):
-        return -infogain(np.fromiter(class_freq.values(), dtype=int))
+        return -gini(np.fromiter(class_freq.values(), dtype=int))
+    # def metric_func(class_freq):
+    #     return -infogain(np.fromiter(class_freq.values(), dtype=int))
     # def metric_func(class_freq): return -gini(class_freq)
 
     models = []
@@ -81,11 +76,12 @@ if __name__ == '__main__':
 
     learners = []
     for i, model in enumerate(models):
-        learners.append(model(candidate_attr=deepcopy(candidate_attr),
-                              n_class=n_class,
-                            #   delta=delta,
-                              max_depth=max_depth,
-                              tau=tau))
+        learners.append(model(
+            candidate_attr=deepcopy(candidate_attr),
+            n_class=n_class,
+            nume_max_class=10,
+            # delta=0.01,
+        ))
 
     def output(performances):
         output_path = 'outputs/%s.pickle' % args.exp
@@ -94,9 +90,9 @@ if __name__ == '__main__':
                 'dataset': args.dataset,
                 'shuffle': stream.shuffle,
                 'seed': stream.seed,
-                'delta': delta,
-                'max_depth': max_depth,
-                'tau': tau,
+                # 'delta': delta,
+                # 'max_depth': max_depth,
+                # 'tau': tau,
                 'learners': legend,
                 'performances': performances,
             }, f)

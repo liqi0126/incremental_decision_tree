@@ -44,7 +44,7 @@ class EfdtNode(VfdtNode):
 
             njk = self.nijk[i]
             split_metric, split_value = splitting_metric(
-                attr.type, njk, metric_func, self.total_sample, class_freq=None)
+                attr.type, njk, metric_func, self.total_sample, self.class_freq)
             if split_metric > best_metric_val:
                 best_metric_val = split_metric
                 best_split_attr = attr
@@ -55,7 +55,7 @@ class EfdtNode(VfdtNode):
 
         if best_metric_val - null_metric > epsilon or (tau is not None and epsilon < tau):
             self.split(best_split_attr, best_split_value, NodeType=EfdtNode)
-            print('split at leaf', self.depth)
+            # print('split at leaf', self.depth)
 
 
     def reevaluate_best_split(self, metric_func, n_class, delta, min_samples_reevaluate, tau=None):
@@ -79,7 +79,7 @@ class EfdtNode(VfdtNode):
 
             njk = self.nijk[i]
             split_metric, split_value = splitting_metric(
-                attr.type, njk, metric_func, self.total_sample, class_freq=None)
+                attr.type, njk, metric_func, self.total_sample, self.class_freq)
             if split_metric > best_metric_val:
                 best_metric_val = split_metric
                 best_split_attr = attr
@@ -92,14 +92,14 @@ class EfdtNode(VfdtNode):
                                  delta, self.total_sample)
 
         if null_metric - best_metric_val > epsilon:
-            print('cut')
+            # print('cut')
             self.cut()
             return True
         else:
             if (
-                best_metric_val - current_metric > epsilon or (tau is not None and epsilon < tau)
+                best_metric_val - current_metric > epsilon or (tau is not None and epsilon < tau and best_metric_val - current_metric > tau/2)
             ) and (best_split_attr != self.split_attr):
-                print('split', self.depth)
+                # print('split', self.depth)
                 self.split(best_split_attr, best_split_value, NodeType=EfdtNode)
                 return True
 
@@ -110,8 +110,26 @@ class EfdtNode(VfdtNode):
 
 
 class EfdtTree(VfdtTree):
-    def __init__(self, candidate_attr, n_class, delta=1e-7, min_samples_reevaluate=20, grace_period=100, max_depth=100, tau=0.05):
-        super().__init__(candidate_attr, n_class=n_class, delta=delta, grace_period=grace_period, max_depth=max_depth, tau=tau)
+    def __init__(
+        self, 
+        candidate_attr, 
+        n_class, 
+        delta=1e-7, 
+        nume_max_class=10, 
+        min_samples_reevaluate=20, 
+        grace_period=100, 
+        max_depth=100, 
+        tau=0.05
+    ):
+        super().__init__(
+            candidate_attr, 
+            n_class=n_class, 
+            delta=delta, 
+            nume_max_class=nume_max_class, 
+            grace_period=grace_period,
+            max_depth=max_depth, 
+            tau=tau
+        )
         self.root = EfdtNode(candidate_attr, parent=None)
         self.min_samples_reevaluate = min_samples_reevaluate
 
@@ -125,7 +143,7 @@ class EfdtTree(VfdtTree):
             else:
                 success = node.reevaluate_best_split(metric_func, self.n_class, self.delta, self.min_samples_reevaluate, self.tau)
                 if success:
-                    print('success')
+                    # print('success')
                     break
                 pass
 
