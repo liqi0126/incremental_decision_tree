@@ -107,7 +107,7 @@ class EfdtNode(VfdtNode):
 
 
 class EfdtTree(VfdtTree):
-    def __init__(self, candidate_attr, n_class, delta, min_samples_reevaluate=20, grace_period=100, max_depth=100, tau=None):
+    def __init__(self, candidate_attr, n_class, delta=1e-7, min_samples_reevaluate=20, grace_period=100, max_depth=100, tau=0.05):
         super().__init__(candidate_attr, n_class, delta, grace_period, max_depth, tau)
         self.root = EfdtNode(candidate_attr, parent=None)
         self.min_samples_reevaluate = min_samples_reevaluate
@@ -115,14 +115,15 @@ class EfdtTree(VfdtTree):
     def _update(self, _x, _y, metric_func):
         path = self.root.trace_down_to_leaf(_x)
         for node in path:
-            node.add_sample(_x, _y)
+            node.add_sample(_x, _y, self.nume_max_class)
             if node.is_leaf():
                 node.attempt_to_split(
                     metric_func, self.n_class, self.delta, self.max_depth, self.grace_period, self.tau)
             else:
-                success = node.reevaluate_best_split(metric_func, self.n_class, self.delta, self.min_samples_reevaluate, self.tau)
-                if success:
-                    break
+                # success = node.reevaluate_best_split(metric_func, self.n_class, self.delta, self.min_samples_reevaluate, self.tau)
+                # if success:
+                    # break
+                pass
 
     def _predict(self, x):
         return self.root.trace_down_to_leaf(x)[-1].most_freq()

@@ -87,7 +87,7 @@ if __name__ == '__main__':
     for i, model in enumerate(models):
         learners.append(model(candidate_attr=deepcopy(candidate_attr),
                               n_class=n_class,
-                              delta=delta,
+                            #   delta=delta,
                               max_depth=max_depth,
                               tau=tau))
 

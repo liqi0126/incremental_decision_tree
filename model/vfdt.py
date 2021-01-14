@@ -34,7 +34,7 @@ class VfdtNode(ClsNode):
             raise RuntimeError
 
 
-    def add_sample(self, x, y):
+    def add_sample(self, x, y, nume_max_class):
         if y not in self.class_freq:
             self.class_freq[y] = 1
         else:
@@ -164,7 +164,7 @@ class VfdtTree(ClsTree):
 
     def _update(self, _x, _y, metric_func):
         leaf = self.root.trace_down_to_leaf(_x)
-        leaf.add_sample(_x, _y)
+        leaf.add_sample(_x, _y, self.nume_max_class)
         leaf.attempt_to_split(metric_func, self.n_class, self.delta, self.max_depth, self.grace_period, self.nume_max_class, self.tau)
 
     def learn_one(self, x, y, metric_func):
