@@ -145,7 +145,7 @@ class VfdtTree(ClsTree):
         candidate_attr, 
         n_class, 
         delta=1e-7, 
-        nume_max_class=32, 
+        nume_max_class=10, 
         grace_period=100, 
         max_depth=100, 
         tau=0.05

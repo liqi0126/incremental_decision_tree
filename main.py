@@ -2,7 +2,7 @@ from dataset.stream import DataStream
 import dataset.config
 from evaluation.EvaluatePrequential import EvaluatePrequential
 
-from metrics.gini import gini
+from metrics.gini import gini, infogain
 
 from model.utils import AttrType
 from model.vfdt import VfdtTree
@@ -24,7 +24,7 @@ def arg_parse():
     parser.add_argument("--seed", type=int, default=4096)
     parser.add_argument("--shuffle", action='store_true')
     parser.add_argument('--tree', nargs='+', type=str,
-                        choices=['v', 'e', 'vfdt', 'efdt', 'river-v', 'river-e'], default=['v', 'e'])
+                        choices=['v', 'e', 'vfdt', 'efdt'], default=['v', 'e'])
     parser.add_argument('--dataset', type=str, default='forest')
     parser.add_argument('--max_instance', type=int, default=200000)
     parser.add_argument('--exp', type=str, default=datetime.datetime.strftime(
@@ -64,8 +64,10 @@ if __name__ == '__main__':
     max_depth = 100
     tau = 0.05
 
+    # def metric_func(class_freq):
+    #     return -gini(np.fromiter(class_freq.values(), dtype=int))
     def metric_func(class_freq):
-        return -gini(np.fromiter(class_freq.values(), dtype=int))
+        return -infogain(np.fromiter(class_freq.values(), dtype=int))
     # def metric_func(class_freq): return -gini(class_freq)
 
     models = []
@@ -76,12 +78,6 @@ if __name__ == '__main__':
     if 'e' in args.tree or 'efdt' in args.tree:
         models.append(EfdtTree)
         legend.append('EFDT')
-    if 'river-v' in args.tree:
-        models.append(tree.HoeffdingAdaptiveTreeClassifier)
-        legend.append('RIVER-VFDT')
-    if 'river-e' in args.tree:
-        models.append(tree.ExtremelyFastDecisionTreeClassifier)
-        legend.append('RIVER-EFDT')
 
     learners = []
     for i, model in enumerate(models):
