@@ -44,9 +44,9 @@ def arg_parse():
                         default=datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%d_%H:%M:%S'),
                         help="Experiments identifier, used to name output file")
     parser.add_argument("--plot", action='store_true',
-                        help="Whether to plot error rates after mining")
+                        help="Whether to plot error rate curves after mining")
     parser.add_argument("--verbose", action='store_true',
-                        help="Whether to output progress information")
+                        help="Whether to print progress bar and information during mining")
 
     # Post process
     args = parser.parse_args()
