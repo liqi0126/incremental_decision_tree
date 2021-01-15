@@ -10,4 +10,4 @@ tau: 0.05
 metric: 'gini'
 
 # Train
-max_instance: 1000000
+max_instance: 800000
