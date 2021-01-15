@@ -43,9 +43,14 @@ class EvaluatePrequential:
 
             current_accuracys = []
             for step, (learner, evaluator, performance) in enumerate(zip(self.learners, self.evaluators, self.performances)):
-                predict = learner.predict_one(x)
-                evaluator.add(int(y == predict))
-                learner.learn_one(x, y, self.learner_metric)
+                try:
+                    predict = learner.predict_one(x)
+                    evaluator.add(int(y == predict))
+                    learner.learn_one(x, y, self.learner_metric)
+                except:
+                    # omit the missing data.
+                    print(count)
+
                 if count % self.freq == 0:
                     accuracy = evaluator.performance()
                     performance.append(1 - accuracy)
