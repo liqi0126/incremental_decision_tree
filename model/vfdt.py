@@ -139,7 +139,8 @@ class VfdtNode(ClsNode):
 
 
 class VfdtTree(ClsTree):
-    def __init__(self, 
+    def __init__(
+        self, 
         candidate_attr, 
         n_class, 
         delta=1e-7, 

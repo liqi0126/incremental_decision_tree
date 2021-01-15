@@ -9,3 +9,11 @@ main.py [-h] [--tree {v,e,vfdt,efdt} [{v,e,vfdt,efdt} ...]]
 
 - `TREE`: `v` or `e` or `efdt` or `vfdt`
 - `DATASET`: `forest` or `skin`
+
+## Requirements
+
+```
+tqdm
+numpy
+
+```
