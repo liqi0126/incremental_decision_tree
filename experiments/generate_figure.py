@@ -7,6 +7,9 @@ parser = argparse.ArgumentParser(description='Incremental Decision Tree: Final E
 parser.add_argument('--dataset', required=True, type=str)
 args = parser.parse_args()
 
+plt.rcParams["figure.figsize"] = (8.8,3.5)
+plt.subplots_adjust(left=0.1, bottom=0.15, right=0.9, top=0.9, hspace=0.1,wspace=0.1)
+
 def get_info(path):
     vfdt = pickle.load(open(path, 'rb'))
     vfdt_performance = vfdt['performances'][0]
@@ -31,7 +34,7 @@ plt.ylabel("Error rate")
 plt.legend(labels=[
     "VFDT: | T: %.2f s | E: %.4f" % (vfdt_time, np.mean(vfdt_performance[-10:])),
     "EFDT: | T: %.2f s | E: %.4f" % (efdt_time, np.mean(efdt_performance[-10:]))
-])
+], loc='upper right')
 # plt.show()
 plt.savefig(f'{args.dataset}_final_unshuffle.png', dpi=600)
 plt.cla()
@@ -39,6 +42,10 @@ plt.cla()
 """
 Shuffle
 """
+if args.dataset.startswith('moa'):
+    print("MOA datasets: skipping shuffled experiments..")
+    exit()
+
 vfdt_performances, vfdt_times = [], []
 efdt_performances, efdt_times = [], []
 for seed in range(4096, 4106):
@@ -62,7 +69,7 @@ plt.ylabel("Error rate")
 plt.legend(labels=[
     "VFDT: | T: %.2f s | E: %.4f" % (np.mean(vfdt_times), np.array(vfdt_performances).mean(0)[-10:].mean()),
     "EFDT: | T: %.2f s | E: %.4f" % (np.mean(efdt_times), np.array(efdt_performances).mean(0)[-10:].mean())
-])
+], loc='upper right')
 # plt.show()
 plt.savefig(f'{args.dataset}_final_10_shuffled_average.png', dpi=600)
 plt.cla()

@@ -188,6 +188,15 @@ class ClsNode:
 
 
 class ClsTree:
+    """Classifier Tree: Base class for VFDT and EFDT
+
+    Parameters
+    ----------
+    max_depth: 
+        Maximum depth of a tree
+    min_sample:
+        Minimum sample observed for a node to attempt split 
+    """
     def __init__(self, candidate_attr=None, max_depth=100, min_sample=5):
         self.root = ClsNode(candidate_attr, parent=None)
         self.max_depth = max_depth

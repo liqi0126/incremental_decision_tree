@@ -6,7 +6,8 @@ sys.path.append('..')
 datasets_config = {
     'forest': {
         'csv_path': './dataset/forest/covtype.csv',
-        'yml_config': './experiments/yamls/forest.yml'
+        'yml_config': './experiments/yamls/forest.yml',
+        'attr_types': [AttrType.NUME] * 10 + [AttrType.CATE] * 44
     },
     'skin': {
         'csv_path': './dataset/skin/skin.csv',

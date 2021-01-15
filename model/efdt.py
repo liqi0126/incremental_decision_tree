@@ -55,7 +55,6 @@ class EfdtNode(VfdtNode):
 
         if best_metric_val - null_metric > epsilon or (tau is not None and epsilon < tau):
             self.split(best_split_attr, best_split_value, NodeType=EfdtNode)
-            # print('split at leaf', self.depth)
 
 
     def reevaluate_best_split(self, metric_func, n_class, delta, min_samples_reevaluate, tau=None):
@@ -92,14 +91,12 @@ class EfdtNode(VfdtNode):
                                  delta, self.total_sample)
 
         if null_metric - best_metric_val > epsilon:
-            # print('cut')
             self.cut()
             return True
         else:
             if (
                 best_metric_val - current_metric > epsilon or (tau is not None and epsilon < tau and best_metric_val - current_metric > tau/2)
             ) and (best_split_attr != self.split_attr):
-                # print('split', self.depth)
                 self.split(best_split_attr, best_split_value, NodeType=EfdtNode)
                 return True
 
@@ -110,6 +107,27 @@ class EfdtNode(VfdtNode):
 
 
 class EfdtTree(VfdtTree):
+    """EFDT: Hoeffding AnyTime Tree Implementation
+
+    Parameters
+    ----------
+    candidate_attr:
+        List of Attrs to generate split suggestions
+    n_class:
+        The number of different classes
+    delta:
+        Confidence in Hoeffding bound
+    nume_max_class:
+        The maximum number of bins in histogram observers for NUME attributes.
+    min_samples_reevaluate:
+        Number of instances observed between reevaluating best split.
+    grace_period:
+        Number of instances observed between split attempts.
+    max_depth:
+        Maximum depth of a tree
+    tau:
+        Tie threshold, see VFDT paper for more details
+    """
     def __init__(
         self, 
         candidate_attr, 
@@ -143,7 +161,6 @@ class EfdtTree(VfdtTree):
             else:
                 success = node.reevaluate_best_split(metric_func, self.n_class, self.delta, self.min_samples_reevaluate, self.tau)
                 if success:
-                    # print('success')
                     break
                 pass
 

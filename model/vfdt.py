@@ -139,6 +139,25 @@ class VfdtNode(ClsNode):
 
 
 class VfdtTree(ClsTree):
+    """VFDT: Hoeffding Tree Implementation
+
+    Parameters
+    ----------
+    candidate_attr:
+        List of Attrs to generate split suggestions
+    n_class:
+        The number of different classes
+    delta:
+        Confidence in Hoeffding bound
+    nume_max_class:
+        The maximum number of bins in histogram observers for NUME attributes.
+    grace_period:
+        Number of instances observed between split attempts.
+    max_depth:
+        Maximum depth of a tree
+    tau:
+        Tie threshold, see VFDT paper for more details
+    """
     def __init__(
         self, 
         candidate_attr, 
