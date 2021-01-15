@@ -24,6 +24,43 @@ class ClsNode:
 
         self.prediction = None
 
+    @staticmethod
+    def build_nume_dict(nume_list, max_class):
+        value_list = nume_list['value']
+        label_list = nume_list['label']
+
+        nume_dict = {}
+
+        sort_idx = np.argsort(value_list)
+        sorted_value_list = np.array(value_list)[sort_idx]
+        sorted_label_list = np.array(label_list)[sort_idx]
+
+        max_class = min(max_class, len(set(value_list)))
+        step = len(sorted_value_list) // max_class
+
+        sparse_value_list = sorted_value_list[::step]
+        if len(sparse_value_list) == 1:
+            return {f'float(\'-inf\')/float(\'inf\')': dict(Counter(sorted_label_list))}
+
+        for i, val in enumerate(sparse_value_list):
+            if i == 0:
+                pass
+            elif i == 1:
+                nume_dict[f'float(\'-inf\')/{val}'] = dict(Counter(sorted_label_list[:step*i]))
+            else:
+                temp = sparse_value_list[i-1]
+                nume_dict[f'{temp}/{val}'] = dict(Counter(sorted_label_list[step*(i-1):step*i]))
+        nume_dict[f'{val}/float(\'inf\')'] = dict(Counter(sorted_label_list[step*i:]))
+        return nume_dict
+
+    @staticmethod
+    def get_nume_key(num, dict_keys):
+        for idx, key in enumerate(dict_keys):
+            start, end = key.split('/')
+            start, end = eval(start), eval(end)
+            if start <= num < end:
+                return idx, key
+
     # given example x, trace down to child
     def trace_down(self, x):
         if self.is_leaf():
@@ -151,6 +188,15 @@ class ClsNode:
 
 
 class ClsTree:
+    """Classifier Tree: Base class for VFDT and EFDT
+
+    Parameters
+    ----------
+    max_depth: 
+        Maximum depth of a tree
+    min_sample:
+        Minimum sample observed for a node to attempt split 
+    """
     def __init__(self, candidate_attr=None, max_depth=100, min_sample=5):
         self.root = ClsNode(candidate_attr, parent=None)
         self.max_depth = max_depth

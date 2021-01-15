@@ -32,8 +32,7 @@ class DataStream:
             if attr.type == AttrType.CATE:
                 attr.values = list(set(self.X[:, index]))
 
-        print('data distribution:')
-        print(Counter(self.y))
+        print('Data distribution:', Counter(self.y))
         self.num_inst = self.X.shape[0]
         self.pointer = 0
 

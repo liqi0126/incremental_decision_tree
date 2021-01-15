@@ -31,12 +31,12 @@ def splitting_metric(attr_type, njk, metric_func, total_sample=None, class_freq=
         total_sample = sum(class_freq.values())
 
     if attr_type == AttrType.NUME:
-        return splitting_metric_nume(njk, metric_func, total_sample, class_freq)
+        return splitting_metric_cate(njk, metric_func, total_sample)
     elif attr_type == AttrType.CATE:
         return splitting_metric_cate(njk, metric_func, total_sample)
 
 
-def splitting_metric_nume(njk, metric_func, total_sample, class_freq):
+def splitting_metric_nume_binary(njk, metric_func, total_sample, class_freq):
     best_metric = -1000000.
     best_split = None
 

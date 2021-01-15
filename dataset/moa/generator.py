@@ -58,6 +58,6 @@ if __name__ == '__main__':
     for i in range(len(configs)):
         for j in range(drift_time):
             subprocess.check_call(configs[i].format(
-                str(int(dataset_size) // drift_time), random.randint(0, 5)), shell=True, cwd=wd + '/moa/lib')
+                str(int(dataset_size) // drift_time), j), shell=True, cwd=wd + '/moa/lib')
             arff2csv('tmp.arff', 'dataset{0}.csv'.format(str(i + 1)), j > 0)
     os.remove(wd + '/tmp.arff')

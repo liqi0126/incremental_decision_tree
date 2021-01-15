@@ -1,8 +1,17 @@
 from .WindowClassificationPerformanceEvaluator import *
-
+from tqdm import tqdm
 
 class EvaluatePrequential:
-    def __init__(self, stream, learners, learner_metric, evaluator=WindowClassificationPerformanceEvaluator, freq=1000, max_inst=2000000, output_func=None):
+    def __init__(
+        self, 
+        stream, 
+        learners, 
+        learner_metric, 
+        evaluator=WindowClassificationPerformanceEvaluator, 
+        freq=1000, 
+        max_inst=2000000, 
+        output_func=None
+    ):
         self.stream = stream
         self.n_learners = len(learners)
         self.learners = learners
@@ -14,7 +23,7 @@ class EvaluatePrequential:
 
         self.output_func = output_func
 
-    def doMainTask(self):
+    def doMainTask(self, verbose=True):
         self.stream.reset()
         count = 0
         self.performances = [[] for _ in range(self.n_learners)]
@@ -22,46 +31,37 @@ class EvaluatePrequential:
         if self.output_func is not None:
             self.output_func(self.performances)
 
+        if verbose:
+            pbar = tqdm(range(self.max_inst)[::self.freq])
+
         while count < self.max_inst:
             instance = self.stream.nextInstance()
             if instance is None:
                 break
             x, y = instance
-            # hack: dict required for river_main
-            # new_x = {}
-            # for i in range(len(x)):
-            #     new_x[f'feat{i}'] = x[i]
-            # x = new_x
             count += 1
 
-            if count % self.freq == 0:
-                print("Instance #%d : " % count, end="")
-
+            current_accuracys = []
             for step, (learner, evaluator, performance) in enumerate(zip(self.learners, self.evaluators, self.performances)):
-                predict = learner.predict_one(x)
-                evaluator.add(int(y == predict))
-                learner.learn_one(x, y, self.learner_metric)
+                try:
+                    predict = learner.predict_one(x)
+                    evaluator.add(int(y == predict))
+                    learner.learn_one(x, y, self.learner_metric)
+                except:
+                    # omit the missing data.
+                    print(count)
+
                 if count % self.freq == 0:
                     accuracy = evaluator.performance()
-                    # error rate
                     performance.append(1 - accuracy)
-                    # DEBUG
-                    # if count == 181000:
-                    #     print(18100)
-                    #     with open('181000.txt', 'w') as f:
-                    #         f.write(learner.print())
-                    # if count == 182000:
-                    #     print(18200)
-                    #     with open('182000.txt', 'w') as f:
-                    #         f.write(learner.print())
-                    #     return self.performances
-                    # if len(performance) > 2 and performance[-1] > performance[-2] + 0.1:
-                    #     return self.performances
-                    print(accuracy, end=" ")
+                    current_accuracys.append(accuracy)
             
             if count % self.freq == 0:
-                print()
                 if self.output_func is not None:
                     self.output_func(self.performances)
+            
+            if verbose and count % self.freq == 0:
+                 pbar.set_description("Instance #%d : " % count + ", Acc: " + str(current_accuracys))
+                 pbar.update(1)
 
         return self.performances
