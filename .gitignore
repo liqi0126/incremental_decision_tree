@@ -2,4 +2,5 @@ __pycache__
 .DS_Store
 outputs
 .idea/
+.vscode/
 __MACOSX
