@@ -11,6 +11,8 @@ class VfdtNode(ClsNode):
 
         # node statistic
         self.nijk = [{} for _ in candidate_attr]
+
+        # maintain a nume_list to build histgram
         self.nume_list = {attr.name: {'value': [], 'label': []} for attr in candidate_attr if attr.type == AttrType.NUME}
 
         self.build_nume_threshold = 1
@@ -59,7 +61,8 @@ class VfdtNode(ClsNode):
                 attr_nume['label'].append(y)
                 if self.nume_count == self.build_nume_threshold:
                     self.nijk[i] = self.build_nume_dict(attr_nume, nume_max_class)
-        
+
+        # double the nume threashold to avoid updating histgram too frequently
         if self.nume_count == self.build_nume_threshold:
             self.build_nume_threshold *= 2
                 

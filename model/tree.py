@@ -25,6 +25,8 @@ class ClsNode:
         self.prediction = None
 
     @staticmethod
+    # build a nume dict to simulate categorical variable. The output should be like
+    # {'float('-inf')/10':10, '10/30': 30, '10/float('inf')': 50}
     def build_nume_dict(nume_list, max_class):
         value_list = nume_list['value']
         label_list = nume_list['label']
@@ -54,6 +56,9 @@ class ClsNode:
         return nume_dict
 
     @staticmethod
+    # return a key of num from the nume_dict,
+    # supppose the nume dict is {'float('-inf')/10':10, '10/30': 30, '10/float('inf')': 50}
+    # then num=5 will produces 'float('-inf')/10'
     def get_nume_key(num, dict_keys):
         for idx, key in enumerate(dict_keys):
             start, end = key.split('/')
