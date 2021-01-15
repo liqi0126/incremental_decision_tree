@@ -54,7 +54,9 @@ def arg_parse():
     args.exp = args.dataset + '_' + args.exp
     if args.shuffle:
         args.exp += '_shuffle'
-    args.exp += f'_seed{args.seed}'
+        args.exp += f'_seed{args.seed}'
+    else:
+        args.exp += '_unshuffle'
 
     if 'v' in args.tree or 'vfdt' in args.tree:
         args.exp = 'vfdt_' + args.exp
