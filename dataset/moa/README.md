@@ -17,4 +17,4 @@ $ python ./generator.py [-n N] [-d D]
 
 ##### 已生成的数据集
 
-一组生成好的数据集已经上传到清华云盘（N = 3,000,000）：https://cloud.tsinghua.edu.cn/f/cb211fd2bf4f41369dc4/ 
+一组生成好的数据集已经上传到清华云盘：https://cloud.tsinghua.edu.cn/f/0cb4d426b61e41758dee/?dl=1
