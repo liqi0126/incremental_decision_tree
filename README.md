@@ -1,5 +1,7 @@
 # **Incremental Decision Tree**: Reproducing Paper *Extremely Fast Decision Tree*
 
+Qi Li, Jialong Wu, Yishujie Zhao, Xinhao Xu
+
 ## Introduction
 
 ![Extremely Fast Decision Tree](figures/efdt_title.png)
